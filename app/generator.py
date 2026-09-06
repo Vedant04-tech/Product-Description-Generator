@@ -225,14 +225,6 @@ class ProductGenerator:
                 temperature=self.config.groq_temperature,
                 max_tokens=self.config.groq_max_tokens,
             )
-        else:
-            # OpenAI fallback if configured
-            from langchain_openai import ChatOpenAI
-            return ChatOpenAI(
-                api_key=self.config.openai_api_key,
-                model_name=self.config.openai_model,
-                temperature=self.config.openai_temperature,
-            )
 
     def generate(self, input_data: ProductInput, max_retries: Optional[int] = None) -> GenerationResult:
         """Execute the full generation and validation pipeline with bounded repair."""
