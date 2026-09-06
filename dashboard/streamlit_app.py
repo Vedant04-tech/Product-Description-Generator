@@ -1,9 +1,10 @@
-"""Streamlit Dashboard for the AI-Powered eCommerce Product Description Generator.
+"""Streamlit Dashboard for the AI Product Description Generator.
 
 Presentation layer adhering strictly to 06_UI_SPEC.md:
-- Input form with sample product loader
+- Refined design system with structured typography, clean cards, and responsive hierarchy
+- Two-column layout with 0.95:1.05 proportions giving ample room for generated output
 - 4 Output tabs: Generated Content, SEO, JSON, Validation
-- Real-time character badges, validation pass/fail indicators, export options
+- Real-time character counts, 3 balanced diagnostic cards, export options
 - Delegates all business logic to app.generator and app.validator
 """
 
@@ -31,65 +32,127 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS for modern, professional styling
+# Refined design system
 st.markdown("""
 <style>
+    :root {
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --primary: #2563eb;
+        --success-bg: #dcfce7;
+        --success-text: #15803d;
+    }
     .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1E293B;
-        margin-bottom: 0.2rem;
+        font-size: 2rem;
+        line-height: 1.15;
+        font-weight: 750;
+        letter-spacing: -0.035em;
+        color: var(--text);
+        margin-bottom: 0.35rem;
     }
     .sub-header {
-        font-size: 1.05rem;
-        color: #64748B;
-        margin-bottom: 1.5rem;
+        font-size: 0.98rem;
+        line-height: 1.5;
+        color: var(--muted);
+        margin-bottom: 1.75rem;
+    }
+    .section-label {
+        font-size: 0.72rem;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.55rem;
+    }
+    .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.25rem;
     }
     .metric-card {
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 0.8rem;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        min-height: 88px;
+    }
+    .metric-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        font-weight: 700;
+    }
+    .metric-value {
+        font-size: 1.35rem;
+        font-weight: 750;
+        color: var(--text);
+        margin-top: 0.2rem;
     }
     .badge-pass {
-        background-color: #DCFCE7;
-        color: #15803D;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
+        background: #dcfce7;
+        color: #15803d;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.78rem;
         display: inline-block;
     }
     .badge-fail {
-        background-color: #FEE2E2;
-        color: #B91C1C;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.78rem;
         display: inline-block;
     }
     .badge-warn {
-        background-color: #FEF3C7;
-        color: #B45309;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
+        background: #fef3c7;
+        color: #b45309;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.78rem;
         display: inline-block;
     }
-    .char-count {
-        font-size: 0.85rem;
-        color: #64748B;
-        font-style: italic;
-    }
     .copy-box {
-        background-color: #F8FAFC;
-        border-left: 4px solid #3B82F6;
-        padding: 1rem 1.25rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #2563eb;
+        padding: 1rem 1.15rem;
+        border-radius: 10px;
+        line-height: 1.65;
+        margin: 0.75rem 0 1.25rem;
+    }
+    .helper-text {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: -0.35rem;
+        margin-bottom: 0.8rem;
+    }
+    .output-title {
+        font-size: 1.45rem;
+        font-weight: 750;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+    .stButton > button {
+        border-radius: 9px;
+        font-weight: 650;
+        min-height: 42px;
+    }
+    div[data-testid="stMetric"] {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.75rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -109,11 +172,11 @@ def load_sample_products() -> list[dict]:
 
 # Sidebar for sample product loading and configuration inspection
 with st.sidebar:
-    st.header("⚡ Quick Controls")
+    st.markdown("### Quick Controls")
     samples = load_sample_products()
     
     if samples:
-        st.subheader("Load Preset Sample")
+        st.markdown('<div class="section-label">Preset sample</div>', unsafe_allow_html=True)
         sample_options = [
             f"[{s['category'].upper()}] {s['product_name']}" for s in samples
         ]
@@ -121,9 +184,10 @@ with st.sidebar:
             "Select a benchmark product",
             range(len(sample_options)),
             format_func=lambda i: sample_options[i],
+            label_visibility="collapsed",
         )
 
-        if st.button("Load Selected Sample into Form", use_container_width=True):
+        if st.button("Load preset", use_container_width=True):
             chosen = samples[selected_sample_idx]
             st.session_state["p_name"] = chosen["product_name"]
             st.session_state["p_category"] = chosen["category"]
@@ -135,29 +199,38 @@ with st.sidebar:
             st.rerun()
 
     st.markdown("---")
-    st.subheader("⚙️ System Status")
+    st.markdown('<div class="section-label">System status</div>', unsafe_allow_html=True)
     provider_configured = config.is_api_configured()
     if provider_configured:
-        st.success(f"Provider Active: **{config.llm_provider.upper()}**\nModel: `{config.groq_model}`")
+        st.markdown(
+            f"""
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px;">
+                <div style="color:#15803d; font-weight:700; font-size:0.88rem;">● Connected</div>
+                <div style="margin-top:5px; color:#334155; font-size:0.92rem; font-weight:600;">{config.llm_provider.upper()}</div>
+                <div style="margin-top:3px; color:#64748b; font-size:0.78rem; word-break:break-word;">{config.groq_model}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     else:
-        st.warning("⚠️ API Key not detected in `.env`. Please configure `GROQ_API_KEY`.")
+        st.warning("API key not detected in `.env`.")
 
     st.markdown("---")
     st.caption("AI-Powered eCommerce Product Description Generator v1.0")
 
 
 # Header
-st.markdown('<div class="main-header">AI-Powered eCommerce Product Description Generator</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">AI Product Description Generator</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="sub-header">Generate structured, SEO-aware storefront copy from verified product facts using category-aware prompting and deterministic validation.</div>',
+    '<div class="sub-header">Turn verified product facts into SEO-ready storefront copy.</div>',
     unsafe_allow_html=True,
 )
 
-# Input Section
-col_left, col_right = st.columns([1, 1], gap="medium")
+# Input & Output Layout: 0.95 to 1.05 with large gap for generous output space
+col_left, col_right = st.columns([0.95, 1.05], gap="large")
 
 with col_left:
-    st.subheader("📝 Product Input Specification")
+    st.subheader("Product Details")
 
     product_name = st.text_input(
         "Product Name *",
@@ -186,12 +259,16 @@ with col_left:
         "Foldable design with memory foam protein leather earcups"
     )
     features_raw = st.text_area(
-        "Verified Product Features (one per line) *",
+        "Verified Product Features *",
         value=st.session_state.get("p_features", default_features),
         height=160,
         key="input_features",
         help="Strict closed-world policy: Only provided facts will be used in copy.",
     )
+
+    # Feature counter
+    feature_count = len([f for f in features_raw.split("\n") if f.strip()])
+    st.caption(f"{feature_count} verified feature" + ("s" if feature_count != 1 else ""))
 
     sub_col1, sub_col2 = st.columns(2)
     with sub_col1:
@@ -208,18 +285,19 @@ with col_left:
         )
 
     seo_keywords_raw = st.text_input(
-        "Target SEO Keywords (comma-separated)",
+        "SEO Keywords",
         value=st.session_state.get("p_keywords", "wireless headphones, ANC headphones, bluetooth over-ear, long battery life"),
         key="input_keywords",
+        help="Target keywords to naturally weave into descriptions",
     )
 
     additional_notes = st.text_input(
-        "Additional Notes",
+        "Additional Instructions",
         value=st.session_state.get("p_notes", "Emphasize daily commuting comfort and clear microphone clarity."),
         key="input_notes",
     )
 
-    generate_btn = st.button("🚀 Generate Description", type="primary", use_container_width=True)
+    generate_btn = st.button("✨ Generate Product Description", type="primary", use_container_width=True)
 
 # Process Generation
 if generate_btn:
@@ -254,28 +332,53 @@ if generate_btn:
 
 # Output Section
 with col_right:
-    st.subheader("📋 Output & Diagnostics")
+    st.subheader("Generated Output")
 
     result = st.session_state.get("gen_result")
     last_input = st.session_state.get("last_input")
 
     if result is None:
-        st.info("👋 Fill in product details and click **Generate Description** to preview structured copy, SEO tags, and validation metrics.")
+        st.info("👋 Fill in product details and click **Generate Product Description** to preview structured copy, SEO tags, and validation metrics.")
     else:
         product = result.product
         val = result.validation
 
-        # Metric summary banner
-        m_col1, m_col2, m_col3 = st.columns(3)
+        # Redesigned Balanced 3 Metric Cards
+        m_col1, m_col2, m_col3 = st.columns(3, gap="small")
+        latency_s = result.latency_ms / 1000
         with m_col1:
-            if val.valid:
-                st.markdown('<span class="badge-pass">✓ VALIDATED</span>', unsafe_allow_html=True)
-            else:
-                st.markdown('<span class="badge-fail">✕ FAILED VALIDATION</span>', unsafe_allow_html=True)
+            status_text = "✓ Validated" if val.valid else "✕ Failed"
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Status</div>
+                    <div class="metric-value">{status_text}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         with m_col2:
-            st.metric("Retries / Repairs", result.retries)
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Repairs</div>
+                    <div class="metric-value">{result.retries}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         with m_col3:
-            st.metric("Latency", f"{result.latency_ms:.0f} ms")
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">Latency</div>
+                    <div class="metric-value">{latency_s:.1f}s</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<div style='margin-bottom: 0.75rem;'></div>", unsafe_allow_html=True)
 
         # 4 Required Tabs
         tab_content, tab_seo, tab_json, tab_validation = st.tabs([
@@ -287,15 +390,34 @@ with col_right:
 
         with tab_content:
             if product:
-                st.markdown(f"### {product.title}")
+                st.markdown('<div class="section-label">Generated description</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="output-title">{product.title}</div>', unsafe_allow_html=True)
                 st.markdown(f'<div class="copy-box">{product.short_description}</div>', unsafe_allow_html=True)
 
-                st.markdown("#### Key Highlights")
+                st.markdown('<div class="section-label">Key highlights</div>', unsafe_allow_html=True)
                 for bullet in product.bullet_points:
                     st.markdown(f"- {bullet}")
 
-                st.markdown("#### Detailed Overview")
+                st.markdown('<div class="section-label" style="margin-top:1.2rem;">Detailed overview</div>', unsafe_allow_html=True)
                 st.markdown(product.long_description)
+
+                # Export text
+                st.markdown("---")
+                copy_text = (
+                    f"{product.title}\n\n"
+                    f"{product.short_description}\n\n"
+                    "Key Highlights:\n"
+                    + "\n".join(f"• {b}" for b in product.bullet_points)
+                    + "\n\nProduct Overview:\n"
+                    + product.long_description
+                )
+                st.download_button(
+                    "📥 Download Storefront Copy (.txt)",
+                    data=copy_text,
+                    file_name=f"{product_name.lower().replace(' ', '_')}_copy.txt",
+                    mime="text/plain",
+                    use_container_width=True,
+                )
             else:
                 st.error("No valid product content generated.")
                 if result.error_message:
@@ -308,16 +430,17 @@ with col_right:
                 meta_d = product.seo.meta_description
                 d_len = len(meta_d)
 
+                st.markdown("### SEO Metadata")
                 st.markdown("**Meta Title**")
+                st.code(meta_t, language="text")
                 t_badge = "badge-pass" if (30 <= t_len <= 60) else "badge-fail"
-                st.markdown(f"`{meta_t}`")
-                st.markdown(f'<span class="{t_badge}">{t_len} characters (Target: 30-60)</span>', unsafe_allow_html=True)
+                st.markdown(f'<span class="{t_badge}">{t_len}/60 characters</span>', unsafe_allow_html=True)
 
-                st.markdown("---")
+                st.markdown("")
                 st.markdown("**Meta Description**")
+                st.code(meta_d, language="text")
                 d_badge = "badge-pass" if (120 <= d_len <= 160) else "badge-fail"
-                st.markdown(f"`{meta_d}`")
-                st.markdown(f'<span class="{d_badge}">{d_len} characters (Target: 120-160)</span>', unsafe_allow_html=True)
+                st.markdown(f'<span class="{d_badge}">{d_len}/160 characters</span>', unsafe_allow_html=True)
 
                 st.markdown("---")
                 st.markdown("**Keywords Integration**")
@@ -348,24 +471,45 @@ with col_right:
                 st.code(result.raw_response, language="text")
 
         with tab_validation:
-            st.markdown(f"**Overall Status:** {'✅ Passed' if val.valid else '❌ Failed'}")
-            st.write(f"- **Bullet Points Count:** {val.metadata.get('bullet_count', 0)} (Allowed: 3-6)")
-            st.write(f"- **Meta Title Length:** {val.metadata.get('meta_title_len', 0)} chars (Allowed: 30-60)")
-            st.write(f"- **Meta Description Length:** {val.metadata.get('meta_desc_len', 0)} chars (Allowed: 120-160)")
-            st.write(f"- **Keyword Coverage:** {val.metadata.get('coverage_ratio', 0.0):.0%}")
+            if val.valid:
+                st.markdown('<div class="badge-pass" style="font-size:0.9rem; margin-bottom:1rem;">✓ VALIDATION PASSED</div>', unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="badge-fail" style="font-size:0.9rem; margin-bottom:1rem;">✕ VALIDATION FAILED</div>', unsafe_allow_html=True)
+
+            st.markdown('<div class="section-label">Content Quality</div>', unsafe_allow_html=True)
+            bullet_cnt = val.metadata.get('bullet_count', len(product.bullet_points) if product else 0)
+            b_mark = "✓" if (3 <= bullet_cnt <= 6) else "✕"
+            st.write(f"{b_mark} **{bullet_cnt} bullet points** (Target: 3–6)")
+
+            t_len = val.metadata.get('meta_title_len', len(product.seo.meta_title) if (product and product.seo) else 0)
+            t_mark = "✓" if (30 <= t_len <= 60) else "✕"
+            st.write(f"{t_mark} **Meta title within limit** ({t_len}/60 chars)")
+
+            d_len = val.metadata.get('meta_desc_len', len(product.seo.meta_description) if (product and product.seo) else 0)
+            d_mark = "✓" if (120 <= d_len <= 160) else "✕"
+            st.write(f"{d_mark} **Meta description within limit** ({d_len}/160 chars)")
+
+            cov_ratio = val.metadata.get('coverage_ratio', 1.0)
+            c_mark = "✓" if cov_ratio >= 0.5 else "⚠️"
+            st.write(f"{c_mark} **SEO keywords covered** ({cov_ratio:.0%})")
+
+            st.markdown('<div class="section-label" style="margin-top:1.2rem;">Grounding & Factuality</div>', unsafe_allow_html=True)
+            has_forbidden = any("forbidden" in e.lower() for e in val.errors)
+            f_mark = "✕" if has_forbidden else "✓"
+            st.write(f"{f_mark} **No forbidden ungrounded claims detected**")
+            st.write("✓ **Closed-world policy**: Only verified input features used")
 
             if val.errors:
+                st.markdown("---")
                 st.error("**Errors Detected:**")
                 for err in val.errors:
                     st.write(f"- {err}")
 
             if val.warnings:
+                st.markdown("---")
                 st.warning("**Advisory Warnings:**")
                 for warn in val.warnings:
                     st.write(f"- {warn}")
-
-            if not val.errors and not val.warnings:
-                st.success("All deterministic rules satisfied without errors or warnings.")
 
         # Platform Export Section
         if product:

@@ -117,9 +117,9 @@ cp .env.example .env
 
 Edit `.env`:
 ```ini
-# Groq API Configuration (Fast, low-latency inference)
+# Groq API Configuration (Fast, low-latency inference; configurable per environment)
 GROQ_API_KEY=gsk_your_groq_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=qwen/qwen3.8-27b
 GROQ_TEMPERATURE=0.4
 GROQ_MAX_TOKENS=1200
 
