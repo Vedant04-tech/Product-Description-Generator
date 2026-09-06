@@ -1,0 +1,484 @@
+[
+  {
+    "id": "elec-001",
+    "product_name": "AuraFlow ANC Wireless Over-Ear Headphones",
+    "category": "electronics",
+    "features": [
+      "Hybrid Active Noise Cancellation with dual feedback microphones",
+      "40mm custom bio-cellulose dynamic drivers",
+      "Up to 45 hours battery life with ANC off, 35 hours with ANC on",
+      "USB-C fast charging: 10 minutes gives 4 hours playback",
+      "Bluetooth 5.3 with multipoint pairing for two devices simultaneously",
+      "Foldable design with memory foam protein leather earcups"
+    ],
+    "target_audience": "Commuters, remote professionals, and audio enthusiasts",
+    "tone": "professional",
+    "seo_keywords": ["wireless headphones", "ANC headphones", "bluetooth over-ear", "long battery life"],
+    "additional_notes": "Emphasize daily commuting comfort and clear microphone clarity."
+  },
+  {
+    "id": "elec-002",
+    "product_name": "PulseFit Ultra GPS Smartwatch",
+    "category": "electronics",
+    "features": [
+      "1.43-inch AMOLED display with 466x466 resolution and 600 nits brightness",
+      "Integrated dual-frequency GNSS (GPS, GLONASS, Galileo)",
+      "24/7 optical heart rate and SpO2 blood oxygen sensor",
+      "5 ATM water resistance rated down to 50 meters",
+      "12-day typical battery life on a single magnetic pin charge",
+      "Over 100 indoor and outdoor sport tracking modes"
+    ],
+    "target_audience": "Fitness runners, cyclists, and outdoor athletes",
+    "tone": "technical",
+    "seo_keywords": ["GPS smartwatch", "fitness tracker", "water resistant smartwatch", "AMOLED watch"],
+    "additional_notes": "Highlight tracking precision and sunlight visibility."
+  },
+  {
+    "id": "elec-003",
+    "product_name": "SoundBarricade Mini Portable Bluetooth Speaker",
+    "category": "electronics",
+    "features": [
+      "IPX7 waterproof rating (submersible up to 1m for 30 minutes)",
+      "Dual passive radiators for enhanced low-end bass resonance",
+      "14 hours of continuous music playtime on single charge",
+      "Integrated silicone carrying strap and rugged rubberized bumper",
+      "Bluetooth 5.2 with 15-meter wireless range"
+    ],
+    "target_audience": "Outdoor adventurers, campers, and beachgoers",
+    "tone": "casual",
+    "seo_keywords": ["portable speaker", "waterproof bluetooth speaker", "outdoor audio", "mini speaker"],
+    "additional_notes": "Focus on durability and take-anywhere convenience."
+  },
+  {
+    "id": "elec-004",
+    "product_name": "NovaCharge 65W GaN Dual-Port Wall Charger",
+    "category": "electronics",
+    "features": [
+      "Gallium Nitride (GaN) semiconductor technology for compact footprint",
+      "Dual ports: 1x USB-C Power Delivery 3.0 (up to 65W) and 1x USB-A (up to 18W)",
+      "Foldable wall prongs for easy travel storage",
+      "Comprehensive multi-protect safety system with over-current and over-voltage protection",
+      "Compatible with modern laptops, tablets, and smartphones"
+    ],
+    "target_audience": "Frequent travelers and minimalist desk setups",
+    "tone": "minimal",
+    "seo_keywords": ["GaN charger", "65W USB-C charger", "fast wall charger", "travel adapter"],
+    "additional_notes": "Keep copy concise and focused on high-efficiency wattage."
+  },
+  {
+    "id": "elec-005",
+    "product_name": "LumixPad Mechanical Gaming Keyboard",
+    "category": "electronics",
+    "features": [
+      "Hot-swappable tactile mechanical switches rated for 70 million keystrokes",
+      "Per-key customizable RGB backlighting with 18 dynamic animation presets",
+      "Compact 75% layout with dedicated volume rotary knob",
+      "Detachable braided USB-C cable and sound-dampening EVA foam plate",
+      "Full N-key rollover and 1000Hz polling rate"
+    ],
+    "target_audience": "Competitive PC gamers and mechanical keyboard enthusiasts",
+    "tone": "persuasive",
+    "seo_keywords": ["mechanical keyboard", "75 percent keyboard", "RGB gaming keyboard", "hot swappable"],
+    "additional_notes": "Drive excitement around rapid keystroke actuation."
+  },
+  {
+    "id": "elec-006",
+    "product_name": "ApexView 4K Ultra-HD Webcam with Ring Light",
+    "category": "electronics",
+    "features": [
+      "Sony STARVIS CMOS sensor delivering true 4K resolution at 30fps or 1080p at 60fps",
+      "Built-in 3-level touch-controlled LED ring light",
+      "Dual omnidirectional noise-canceling stereo microphones",
+      "Physical sliding privacy shutter integrated into chassis",
+      "Plug-and-play USB 3.0 interface compatible with Windows, macOS, and ChromeOS"
+    ],
+    "target_audience": "Content creators, streamers, and remote executives",
+    "tone": "luxury",
+    "seo_keywords": ["4K webcam", "streaming webcam", "webcam with light", "remote conference camera"],
+    "additional_notes": "Highlight broadcast clarity and executive presence."
+  },
+  {
+    "id": "elec-007",
+    "product_name": "PowerBank MagSlim 10000mAh Magnetic Charger",
+    "category": "electronics",
+    "features": [
+      "10000mAh high-density lithium polymer battery pack",
+      "15W wireless magnetic charging alignment",
+      "20W USB-C bi-directional fast charging port",
+      "Slim 14mm profile with soft-touch matte exterior",
+      "LED digital battery percentage indicator"
+    ],
+    "target_audience": "Smartphone power users and daily commuters",
+    "tone": "professional",
+    "seo_keywords": ["magnetic power bank", "10000mAh portable charger", "wireless battery pack"],
+    "additional_notes": "Focus on sleek pocketability and magnetic snap convenience."
+  },
+  {
+    "id": "elec-008",
+    "product_name": "OmniStream Quad-Band Wi-Fi 7 Router",
+    "category": "electronics",
+    "features": [
+      "Next-generation Wi-Fi 7 speeds up to 19 Gbps across 4 bands (6GHz, 5GHz-1, 5GHz-2, 2.4GHz)",
+      "Multi-Link Operation (MLO) for reduced network latency",
+      "One 10 Gbps WAN/LAN port plus four 2.5 Gbps Ethernet LAN ports",
+      "Eight high-gain internal antennas with beamforming coverage up to 3500 sq ft",
+      "Quad-core 2.2 GHz 64-bit processor with 2GB DDR4 memory"
+    ],
+    "target_audience": "Smart homes with heavy 8K streaming, VR, and multi-device networks",
+    "tone": "technical",
+    "seo_keywords": ["wifi 7 router", "high speed router", "10G gaming router", "mesh ready router"],
+    "additional_notes": "Emphasize throughput headroom and low ping latency."
+  },
+  {
+    "id": "elec-009",
+    "product_name": "VisionDock 12-in-1 Dual 4K Thunderbolt Hub",
+    "category": "electronics",
+    "features": [
+      "Thunderbolt 4 upstream port with 90W host laptop charging",
+      "Supports dual 4K displays at 60Hz or single 8K display via HDMI 2.1 and DisplayPort 1.4",
+      "Gigabit Ethernet RJ45 port, SD/microSD 4.0 card readers",
+      "Three USB-A 3.2 Gen 2 ports (10 Gbps) and one USB-C 10 Gbps data port",
+      "Anodized aluminum enclosure with passive heat dissipation"
+    ],
+    "target_audience": "Creative video editors, graphic designers, and laptop desk setups",
+    "tone": "professional",
+    "seo_keywords": ["thunderbolt dock", "dual 4K docking station", "laptop hub", "USB-C docking station"],
+    "additional_notes": "Highlight single-cable workstation expansion."
+  },
+  {
+    "id": "elec-010",
+    "product_name": "AeroBuds True Wireless Sports Earbuds",
+    "category": "electronics",
+    "features": [
+      "Ergonomic flexible ear hooks for secure fit during high-intensity workouts",
+      "IPX8 sweat and waterproof certification",
+      "10mm graphene audio drivers with punchy acoustic profile",
+      "8 hours continuous playback, 40 hours total with charging case",
+      "Physical button controls for playback, call answer, and voice assistant"
+    ],
+    "target_audience": "Marathoners, gym enthusiasts, and crossfit athletes",
+    "tone": "persuasive",
+    "seo_keywords": ["sports wireless earbuds", "waterproof workout earbuds", "ear hook earphones"],
+    "additional_notes": "Emphasize non-slip stability and energetic bass."
+  },
+  {
+    "id": "app-001",
+    "product_name": "All-Day Merino Wool Crewneck Sweater",
+    "category": "apparel",
+    "features": [
+      "100% Australian extra-fine 19.5-micron merino wool",
+      "Ribbed collar, cuffs, and hem with reinforced interior stitching",
+      "Naturally odor-resistant and temperature-regulating fiber structure",
+      "Machine washable on gentle wool cycle or hand wash cold",
+      "Tailored modern regular fit suitable for layering over collared shirts"
+    ],
+    "target_audience": "Professionals seeking versatile business-casual knitwear",
+    "tone": "luxury",
+    "seo_keywords": ["merino wool sweater", "crewneck knitwear", "mens merino sweater", "business casual sweater"],
+    "additional_notes": "Highlight softness without scratchiness and versatile layering."
+  },
+  {
+    "id": "app-002",
+    "product_name": "Ventura Lightweight Ripstop Trail Jacket",
+    "category": "apparel",
+    "features": [
+      "Durable 100% recycled nylon ripstop outer shell with DWR water-repellent finish",
+      "Packs down completely into its own zippered chest pocket",
+      "Adjustable bungee drawcord hood and elasticized storm cuffs",
+      "Underarm laser-cut ventilation eyelets for airflow",
+      "Reflective chest and back logos for low-light visibility"
+    ],
+    "target_audience": "Hikers, trail runners, and outdoor travelers",
+    "tone": "technical",
+    "seo_keywords": ["windbreaker jacket", "packable rain shell", "trail running jacket", "ripstop outerwear"],
+    "additional_notes": "Focus on packable convenience and weather-shedding utility."
+  },
+  {
+    "id": "app-003",
+    "product_name": "Everyday Relaxed Organic Cotton Graphic Tee",
+    "category": "apparel",
+    "features": [
+      "220 GSM heavyweight 100% certified organic ring-spun cotton",
+      "Drop-shoulder relaxed streetwear silhouette",
+      "Water-based screen-printed chest graphic with soft hand feel",
+      "Pre-shrunk fabric to minimize shrinkage in normal wash",
+      "Ribbed 1-inch crew neckline"
+    ],
+    "target_audience": "Young adults and casual streetwear wearers",
+    "tone": "casual",
+    "seo_keywords": ["organic cotton t-shirt", "relaxed fit graphic tee", "heavyweight tee", "streetwear tshirt"],
+    "additional_notes": "Keep language easy-going and focus on comfortable drape."
+  },
+  {
+    "id": "app-004",
+    "product_name": "CommutePro Water-Resistant Technical Chino Pants",
+    "category": "apparel",
+    "features": [
+      "Four-way stretch woven twill (92% polyester, 8% elastane)",
+      "Hidden zippered security pocket on right seam for passport or phone",
+      "Reflective inner cuff tape visible when pants are rolled up for cycling",
+      "Wrinkle-resistant fabric with fluorocarbon-free water-repellent coating",
+      "Articulated knees and gusseted crotch for unrestricted movement"
+    ],
+    "target_audience": "Urban bike commuters and hybrid office workers",
+    "tone": "professional",
+    "seo_keywords": ["technical chinos", "commuter pants", "stretch travel trousers", "water resistant chinos"],
+    "additional_notes": "Stress movement freedom that looks professional in meetings."
+  },
+  {
+    "id": "app-005",
+    "product_name": "LuxeSilk Mulberry Silk Slip Dress",
+    "category": "apparel",
+    "features": [
+      "100% pure 22 momme Grade 6A mulberry silk with gentle satin luster",
+      "Bias-cut construction designed to drape naturally along body contours",
+      "Adjustable slim spaghetti shoulder straps with discreet gold-tone hardware",
+      "Side slit hem measuring 8 inches for ease of walking",
+      "French-seamed interior for smooth contact against skin"
+    ],
+    "target_audience": "Evening wear, special occasions, and refined capsule wardrobes",
+    "tone": "luxury",
+    "seo_keywords": ["silk slip dress", "mulberry silk evening dress", "bias cut satin dress"],
+    "additional_notes": "Evoke timeless elegance and fluid drape."
+  },
+  {
+    "id": "app-006",
+    "product_name": "TerraFlex Performance Quick-Dry Boardshorts",
+    "category": "apparel",
+    "features": [
+      "4-way stretch fabric engineered from 88% recycled polyester and 12% spandex",
+      "Hydrophobic quick-dry treatment dries within 15 minutes out of water",
+      "Contoured waistband with lace-up drawcord closure",
+      "Welded zippered back pocket with internal key loop and drainage grommet",
+      "9-inch inseam hitting right above the knee"
+    ],
+    "target_audience": "Surfers, swimmers, and resort vacationers",
+    "tone": "persuasive",
+    "seo_keywords": ["boardshorts", "stretch swim trunks", "quick dry surf shorts", "mens boardshorts"],
+    "additional_notes": "Highlight rash-free comfort and secure fit in surf."
+  },
+  {
+    "id": "app-007",
+    "product_name": "AlpineShield 800-Fill Goose Down Parka",
+    "category": "apparel",
+    "features": [
+      "800-fill power Responsible Down Standard (RDS) certified goose down",
+      "2-layer waterproof/windproof breathable shell with taped critical seams",
+      "Insulated snorkel hood with detachable synthetic fur ruff",
+      "Fleece-lined handwarmer pockets and internal zippered media pocket",
+      "Heavy-duty two-way YKK front zipper with magnetic storm flap"
+    ],
+    "target_audience": "Winter commuters and cold-climate travelers",
+    "tone": "technical",
+    "seo_keywords": ["winter down parka", "800 fill down jacket", "waterproof winter coat", "warm arctic parka"],
+    "additional_notes": "Focus on extreme cold protection without unnecessary bulk."
+  },
+  {
+    "id": "app-008",
+    "product_name": "Essential Linen Button-Up Resort Shirt",
+    "category": "apparel",
+    "features": [
+      "100% natural European flax linen with garment-washed softness",
+      "Relaxed camp collar styling with straight bottom hem and side vents",
+      "Breathable open weave allowing natural air circulation",
+      "Mother-of-pearl buttons cross-stitched for durability",
+      "Pre-washed to soften the natural texture and prevent excessive shrinkage"
+    ],
+    "target_audience": "Warm-weather travelers, summer dining, and casual weekends",
+    "tone": "casual",
+    "seo_keywords": ["linen shirt", "camp collar shirt", "mens summer linen", "resort wear shirt"],
+    "additional_notes": "Describe natural airy texture and relaxed sophistication."
+  },
+  {
+    "id": "app-009",
+    "product_name": "StudioForm Seamless High-Waisted Leggings",
+    "category": "apparel",
+    "features": [
+      "Seamless circular knit fabric: 78% nylon, 22% Lycra elastane",
+      "4.5-inch ribbed high-rise compression waistband that stays in place",
+      "Squat-proof opaque construction verified through 200 GSM density",
+      "Moisture-wicking yarn treatment draws sweat away from the body",
+      "Ankle-length 25-inch inseam"
+    ],
+    "target_audience": "Yoga, pilates, and active gym training",
+    "tone": "persuasive",
+    "seo_keywords": ["seamless leggings", "high waisted yoga pants", "compression tights", "squat proof leggings"],
+    "additional_notes": "Highlight zero waistband roll-down and total opacity."
+  },
+  {
+    "id": "app-010",
+    "product_name": "Heritage Raw Denim Selvedge Jeans",
+    "category": "apparel",
+    "features": [
+      "14.5 oz Japanese kurabo selvedge raw denim woven on vintage shuttle looms",
+      "Classic red-line selvedge ID visible at outseam when cuffed",
+      "Solid copper rivets and donut-button fly closure",
+      "Classic mid-rise straight leg cut",
+      "Heavyweight natural vegetable-tanned leather waistband patch"
+    ],
+    "target_audience": "Denim purists and menswear heritage enthusiasts",
+    "tone": "minimal",
+    "seo_keywords": ["selvedge denim", "raw denim jeans", "japanese selvedge", "straight leg raw jeans"],
+    "additional_notes": "Emphasize authentic shuttle-loom craftsmanship and natural fade journey."
+  },
+  {
+    "id": "home-001",
+    "product_name": "Artisan Cast Iron Dutch Oven (5.5 Quart)",
+    "category": "home_goods",
+    "features": [
+      "Heavyweight enameled cast iron delivering even heat distribution and retention",
+      "Vibrant multi-coat vitreous enamel finish resistant to chipping and dulling",
+      "Tight-fitting lid with interior condensation bumps for continuous self-basting",
+      "Stainless steel lid knob oven-safe up to 500 degrees Fahrenheit (260C)",
+      "Compatible with gas, electric, induction, and ceramic stovetops"
+    ],
+    "target_audience": "Home cooks, bread bakers, and slow-cook culinary enthusiasts",
+    "tone": "luxury",
+    "seo_keywords": ["cast iron dutch oven", "enameled dutch oven", "bread baking pot", "5.5 quart cookware"],
+    "additional_notes": "Highlight stovetop-to-oven versatility and table-ready presentation."
+  },
+  {
+    "id": "home-002",
+    "product_name": "AeroBreeze Ultrasonic Cool Mist Humidifier (4L)",
+    "category": "home_goods",
+    "features": [
+      "4.0-liter top-fill water tank providing up to 36 hours of continuous mist",
+      "Whisper-quiet ultrasonic operation below 26 decibels",
+      "Built-in essential oil aroma diffuser tray with 3 washable pads",
+      "Automatic shut-off safety protection when water level is depleted",
+      "360-degree rotating mist nozzle with 3 adjustable output levels"
+    ],
+    "target_audience": "Bedrooms, nurseries, and home offices needing air moisture",
+    "tone": "casual",
+    "seo_keywords": ["cool mist humidifier", "ultrasonic humidifier", "top fill bedroom humidifier", "quiet humidifier"],
+    "additional_notes": "Focus on easy top-fill cleaning and quiet sleep conditions."
+  },
+  {
+    "id": "home-003",
+    "product_name": "PrecisionGrind Burr Coffee Grinder",
+    "category": "home_goods",
+    "features": [
+      "40mm commercial-grade stainless steel conical burrs for uniform grinds",
+      "35 precise grind settings ranging from fine espresso to coarse French press",
+      "Digital timer control dial adjustable in 0.1-second increments",
+      "Anti-static ionizer technology reduces coffee grounds mess in collection chamber",
+      "250g bean hopper with UV-blocking tinted lid"
+    ],
+    "target_audience": "Specialty coffee lovers and home baristas",
+    "tone": "technical",
+    "seo_keywords": ["conical burr grinder", "coffee grinder espresso", "electric coffee grinder", "anti static grinder"],
+    "additional_notes": "Highlight grind consistency and low heat retention during milling."
+  },
+  {
+    "id": "home-004",
+    "product_name": "Nordic Solid Oak Minimalist Dining Chair",
+    "category": "home_goods",
+    "features": [
+      "Constructed from 100% solid FSC-certified white oak timber",
+      "Curved steam-bent backrest ergonomically shaped for spine support",
+      "Mortise-and-tenon joinery with reinforced corner wood blocks",
+      "Finished with non-toxic, matte protective clear coat",
+      "Includes pre-attached non-scratch felt floor glides"
+    ],
+    "target_audience": "Interior design enthusiasts, apartments, and modern dining rooms",
+    "tone": "minimal",
+    "seo_keywords": ["solid oak dining chair", "scandinavian wooden chair", "minimalist dining chair", "FSC wood furniture"],
+    "additional_notes": "Emphasize clean Scandinavian lines and structural durability."
+  },
+  {
+    "id": "home-005",
+    "product_name": "EverPure 5-Stage Under-Sink Water Filtration System",
+    "category": "home_goods",
+    "features": [
+      "5-stage filtration: sediment filter, carbon block, reverse osmosis membrane, post-carbon, remineralization",
+      "Removes up to 99% of lead, chlorine, fluoride, heavy metals, and microplastics",
+      "Fast flow rate dispensing 0.8 gallons per minute",
+      "Includes dedicated brushed nickel lead-free drinking water faucet",
+      "Quick-twist filter replacement design requires no plumbing tools"
+    ],
+    "target_audience": "Health-conscious families and homeowners",
+    "tone": "professional",
+    "seo_keywords": ["under sink water filter", "reverse osmosis system", "drinking water filtration", "remineralization filter"],
+    "additional_notes": "Highlight water purity and DIY 15-minute twist cartridge changes."
+  },
+  {
+    "id": "home-006",
+    "product_name": "CloudRest Ergonomic Shredded Memory Foam Pillow",
+    "category": "home_goods",
+    "features": [
+      "Adjustable fill: proprietary blend of shredded gel memory foam and microfiber",
+      "Removable zippered outer cover made from breathable bamboo-derived rayon",
+      "OEKO-TEX Standard 100 and CertiPUR-US certified foam",
+      "Customizable loft suitable for side, back, and stomach sleepers",
+      "Machine washable and dryer safe outer cover"
+    ],
+    "target_audience": "Individuals suffering from neck stiffness or poor sleep alignment",
+    "tone": "persuasive",
+    "seo_keywords": ["memory foam pillow", "adjustable loft pillow", "ergonomic neck pillow", "cooling bamboo pillow"],
+    "additional_notes": "Focus on personalized cervical alignment and cooling airflow."
+  },
+  {
+    "id": "home-007",
+    "product_name": "PureLoom 100% Organic Turkish Cotton Bath Towel Set",
+    "category": "home_goods",
+    "features": [
+      "Set of 4 bath towels woven from 700 GSM long-staple Turkish Aegean organic cotton",
+      "Zero-twist spinning technology creates dense, ultra-absorbent plush loops",
+      "Double-stitched side hems to resist fraying over extended laundering",
+      "Generously sized bath sheet dimensions: 30 x 58 inches",
+      "Pre-washed to improve immediate absorbency from first use"
+    ],
+    "target_audience": "Luxury bathroom updates, boutique hotels, and spa lovers",
+    "tone": "luxury",
+    "seo_keywords": ["turkish cotton towels", "organic bath towel set", "700 GSM plush towels", "luxury spa towels"],
+    "additional_notes": "Evoke five-star spa indulgence and rapid absorbency."
+  },
+  {
+    "id": "home-008",
+    "product_name": "ThermaShield Triple-Weave Blackout Curtains",
+    "category": "home_goods",
+    "features": [
+      "High-density triple-weave fabric blocks 95% to 99% of sunlight and UV rays",
+      "Thermal insulation barrier helps keep rooms cooler in summer and warmer in winter",
+      "Reduces outside ambient street noise up to 15 decibels",
+      "Set includes 2 panels, each measuring 52 inches wide by 84 inches long",
+      "8 stainless steel matte grommets per panel fitting curtain rods up to 1.6 inches"
+    ],
+    "target_audience": "Daytime sleepers, home theater setups, and energy-conscious homes",
+    "tone": "professional",
+    "seo_keywords": ["blackout curtains", "thermal insulated drapes", "noise reducing curtains", "grommet window panels"],
+    "additional_notes": "Emphasize darkness for quality sleep and energy savings on HVAC."
+  },
+  {
+    "id": "home-009",
+    "product_name": "StakMaster Modular Bamboo Drawer Organizer Set",
+    "category": "home_goods",
+    "features": [
+      "5-piece modular set crafted from 100% natural sustainable Moso bamboo",
+      "Includes non-slip silicone feet on bottom of each tray to prevent shifting",
+      "Water-resistant sealed finish easy to wipe clean with a damp cloth",
+      "Interchangeable box configurations fit standard kitchen, office, and vanity drawers",
+      "Finger-jointed corner construction for structural rigidity"
+    ],
+    "target_audience": "Home organizers, declutterers, and kitchen tidy enthusiasts",
+    "tone": "casual",
+    "seo_keywords": ["bamboo drawer organizer", "modular kitchen organizers", "utensil divider trays"],
+    "additional_notes": "Highlight instant drawer transformation and customizable layouts."
+  },
+  {
+    "id": "home-010",
+    "product_name": "FlameCraft Portable Smokeless Fire Pit",
+    "category": "home_goods",
+    "features": [
+      "Double-wall secondary combustion design reduces smoke by up to 85%",
+      "304 stainless steel construction built to withstand high heat and corrosion",
+      "Includes removable ash pan for effortless 30-second cleanup",
+      "19.5-inch diameter accommodates standard split firewood logs up to 16 inches",
+      "Includes nylon weather-resistant carry bag with reinforced handles"
+    ],
+    "target_audience": "Backyard patio entertainers, campers, and outdoor gatherings",
+    "tone": "persuasive",
+    "seo_keywords": ["smokeless fire pit", "stainless steel firepit", "portable backyard fire pit", "camping fire pit"],
+    "additional_notes": "Stress warm campfire ambiance without teary eyes or smelling like smoke."
+  }
+]
