@@ -191,6 +191,7 @@ def load_preset_into_form(samples: list[dict], index: int) -> None:
     st.session_state.pop("gen_result", None)
     st.session_state.pop("last_input", None)
     st.session_state["input_dirty"] = False
+    st.session_state["preset_loaded"] = True
 
 
 def clear_product_form() -> None:
@@ -203,6 +204,7 @@ def clear_product_form() -> None:
     st.session_state["input_keywords"] = ""
     st.session_state["input_notes"] = ""
     st.session_state["input_dirty"] = False
+    st.session_state["preset_loaded"] = False
     st.session_state.pop("gen_result", None)
     st.session_state.pop("last_input", None)
 
@@ -210,6 +212,7 @@ def clear_product_form() -> None:
 def mark_input_dirty() -> None:
     """Flag that the input fields have been edited by the user."""
     st.session_state["input_dirty"] = True
+    st.session_state["preset_loaded"] = False
 
 
 # Initialize default widget states if not already present
@@ -229,6 +232,8 @@ if "input_notes" not in st.session_state:
     st.session_state["input_notes"] = ""
 if "input_dirty" not in st.session_state:
     st.session_state["input_dirty"] = False
+if "preset_loaded" not in st.session_state:
+    st.session_state["preset_loaded"] = False
 
 
 # Sidebar for sample product loading and configuration inspection
@@ -282,12 +287,12 @@ with st.sidebar:
         st.warning("API key not detected in `.env`.")
 
     with st.expander("⚙️ Advanced Pipeline Settings"):
-        selected_max_retries = st.slider(
-            "Max Repair Retries",
-            min_value=0,
-            max_value=3,
-            value=config.max_retries,
-            help="Number of bounded LLM repair attempts if deterministic validation fails.",
+        retry_limit = st.selectbox(
+            "Maximum repair attempts",
+            options=[0, 1, 2, 3],
+            index=min(config.max_retries, 3),
+            key="setting_retry_limit",
+            help="Number of additional LLM calls allowed when validation fails. More attempts may increase latency.",
         )
 
     st.markdown("---")
@@ -307,10 +312,13 @@ col_left, col_right = st.columns([0.95, 1.05], gap="large")
 with col_left:
     st.subheader("Product Details")
 
+    if st.session_state.get("preset_loaded", False):
+        st.success("✓ Preset loaded into the form. You can edit any field before generating.")
+
     product_name = st.text_input(
         "Product Name *",
         key="input_product_name",
-        placeholder="e.g. AuraFlow ANC Wireless Headphones",
+        placeholder="e.g. CloudRest Ergonomic Memory Foam Pillow",
         help="Enter the exact storefront product name.",
         on_change=mark_input_dirty,
     )
@@ -330,9 +338,9 @@ with col_left:
         height=160,
         placeholder=(
             "Enter one verified fact per line:\n\n"
-            "40mm dynamic drivers\n"
-            "Bluetooth 5.3\n"
-            "45-hour battery life"
+            "Adjustable shredded memory foam fill\n"
+            "Breathable bamboo-derived rayon cover\n"
+            "Machine washable and dryer safe"
         ),
         help="Strict closed-world policy: Only provided facts will be used in copy.",
         on_change=mark_input_dirty,
@@ -345,7 +353,7 @@ with col_left:
         "Only these facts will be used to generate product claims."
     )
 
-    sub_col1, sub_col2 = st.columns(2)
+    sub_col1, sub_col2 = st.columns([0.8, 1.2])
     with sub_col1:
         tones = ["professional", "casual", "persuasive", "minimal", "luxury", "technical"]
         tone = st.selectbox(
@@ -359,22 +367,24 @@ with col_left:
         target_audience = st.text_input(
             "Target Audience",
             key="input_audience",
-            placeholder="e.g. Remote professionals and commuters",
+            placeholder="e.g. Side sleepers seeking neck support",
             on_change=mark_input_dirty,
         )
 
     seo_keywords_raw = st.text_input(
         "SEO Keywords",
         key="input_keywords",
-        placeholder="wireless headphones, ANC headphones, bluetooth",
+        placeholder="memory foam pillow, adjustable pillow, neck support",
         help="Target keywords to naturally weave into descriptions",
         on_change=mark_input_dirty,
     )
 
-    additional_notes = st.text_input(
+    additional_notes = st.text_area(
         "Additional Instructions",
         key="input_notes",
-        placeholder="Optional: emphasize comfort, portability, clean design...",
+        height=90,
+        placeholder="Optional: emphasize comfort, portability, premium design, seasonal use, etc.",
+        help="Optional instructions for the writing style or emphasis.",
         on_change=mark_input_dirty,
     )
 
@@ -416,16 +426,18 @@ if generate_btn:
                 additional_notes=additional_notes.strip() or None,
             )
 
+            chosen_retries = st.session_state.get("setting_retry_limit", config.max_retries)
             generator = ProductGenerator()
             with st.spinner("Generating copy & executing deterministic validation..."):
                 gen_result = generator.generate(
                     input_contract,
-                    max_retries=st.session_state.get("selected_max_retries", config.max_retries),
+                    max_retries=chosen_retries,
                 )
 
             st.session_state["gen_result"] = gen_result
             st.session_state["last_input"] = input_contract
             st.session_state["input_dirty"] = False
+            st.session_state["preset_loaded"] = False
 
         except Exception as e:
             st.error(f"Execution failed: {e}")

@@ -173,6 +173,7 @@ def main():
     parser.add_argument("--tone", choices=["professional", "casual", "persuasive", "minimal", "luxury", "technical"], default="professional", help="Tone")
     parser.add_argument("--keywords", nargs="*", default=[], help="Target SEO keywords")
     parser.add_argument("--audience", type=str, default=None, help="Target audience")
+    parser.add_argument("--max-retries", type=int, default=None, help="Maximum validation repair attempts (0-3)")
     parser.add_argument("--export-shopify", type=str, default=None, help="Export Shopify payload to JSON file")
     parser.add_argument("--export-woo", type=str, default=None, help="Export WooCommerce payload to JSON file")
     parser.add_argument("--mock", action="store_true", help="Run with mock LLM for offline demonstration")
@@ -197,7 +198,7 @@ def main():
         generator = ProductGenerator(llm=MockLLM(mode="v3"))
     else:
         generator = ProductGenerator()
-    result = generator.generate(input_data)
+    result = generator.generate(input_data, max_retries=args.max_retries)
 
     display_result(result)
 

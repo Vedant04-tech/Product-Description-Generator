@@ -317,6 +317,43 @@ def test_generator_max_retries_exhaustion(sample_valid_input, sample_valid_descr
     assert result.validation.valid is False
 
 
+def test_generator_custom_max_retries_zero(sample_valid_input, sample_valid_description):
+    """Generator with max_retries=0 must make exactly 1 call when validation fails."""
+    bad_data = sample_valid_description.model_dump()
+    bad_data["seo"]["meta_title"] = "Bad"
+    resp = MagicMock(content=json.dumps(bad_data))
+
+    mock_llm = MagicMock()
+    mock_llm.invoke.return_value = resp
+
+    generator = ProductGenerator(llm=mock_llm)
+    result = generator.generate(sample_valid_input, max_retries=0)
+
+    # 1 initial attempt + 0 retries = 1 call
+    assert mock_llm.invoke.call_count == 1
+    assert result.retries == 0
+    assert result.validation.valid is False
+
+
+def test_generator_custom_max_retries_clamped(sample_valid_input, sample_valid_description):
+    """Generator must clamp excessive max_retries to 3."""
+    bad_data = sample_valid_description.model_dump()
+    bad_data["seo"]["meta_title"] = "Bad"
+    resp = MagicMock(content=json.dumps(bad_data))
+
+    mock_llm = MagicMock()
+    mock_llm.invoke.return_value = resp
+
+    generator = ProductGenerator(llm=mock_llm)
+    result = generator.generate(sample_valid_input, max_retries=99)
+
+    # Clamped to 3: 1 initial attempt + 3 retries = 4 calls
+    assert mock_llm.invoke.call_count == 4
+    assert result.retries == 3
+    assert result.validation.valid is False
+
+
+
 # ============================================================================
 # 5. Integrations / Platform Adapters Tests
 # ============================================================================

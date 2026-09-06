@@ -230,7 +230,11 @@ class ProductGenerator:
         """Execute the full generation and validation pipeline with bounded repair."""
         start_time = time.perf_counter()
         retries = 0
-        retries_limit = max_retries if max_retries is not None else self.config.max_retries
+        retry_limit = (
+            self.config.max_retries
+            if max_retries is None
+            else max(0, min(int(max_retries), 3))
+        )
 
         # Load category config
         try:
@@ -259,7 +263,7 @@ class ProductGenerator:
         current_description: Optional[ProductDescription] = None
         current_validation: Optional[ValidationResult] = None
 
-        while retries <= retries_limit:
+        while retries <= retry_limit:
             try:
                 response = llm.invoke(messages)
                 raw_text = response.content if hasattr(response, "content") else str(response)
@@ -289,7 +293,7 @@ class ProductGenerator:
                     )
 
                 # If invalid and we have retries remaining, prepare fresh repair prompt without context bloat
-                if retries < retries_limit:
+                if retries < retry_limit:
                     retries += 1
                     repair_text = compose_repair_prompt(
                         input_data=input_data,
@@ -305,7 +309,7 @@ class ProductGenerator:
 
             except Exception as e:
                 parse_err = f"Generation/Parsing error: {e}"
-                if retries < retries_limit:
+                if retries < retry_limit:
                     retries += 1
                     repair_text = compose_repair_prompt(
                         input_data=input_data,
