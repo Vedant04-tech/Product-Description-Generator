@@ -3,13 +3,18 @@
 Presentation layer adhering strictly to 06_UI_SPEC.md:
 - Refined design system with structured typography, clean cards, and responsive hierarchy
 - Two-column layout with 0.95:1.05 proportions giving ample room for generated output
-- 4 Output tabs: Generated Content, SEO, JSON, Validation
-- Real-time character counts, 3 balanced diagnostic cards, export options
+- Direct Session State callback architecture for robust preset loading and form clearing
+- Stale output warning on input changes
+- Safe HTML escaping for LLM output
+- 4 Output tabs: Generated Content (with copy-to-clipboard), SEO, JSON, Validation
+- Real-time character counters and balanced diagnostic cards
 - Delegates all business logic to app.generator and app.validator
 """
 
+import html
 import json
 import os
+import re
 import sys
 from pathlib import Path
 import streamlit as st
@@ -159,15 +164,71 @@ st.markdown("""
 
 
 def load_sample_products() -> list[dict]:
-    """Load benchmark samples from samples.json."""
+    """Load benchmark samples from samples.json with explicit error reporting."""
     samples_path = config.data_dir / "samples.json"
     if samples_path.exists():
         try:
             with open(samples_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            st.sidebar.error(f"Could not load preset samples: {e}")
             return []
     return []
+
+
+# Callbacks for robust Session State management
+def load_preset_into_form(samples: list[dict], index: int) -> None:
+    """Load a benchmark preset directly into the form widget state."""
+    chosen = samples[index]
+    st.session_state["input_product_name"] = chosen.get("product_name", "")
+    st.session_state["input_category"] = chosen.get("category", "electronics")
+    st.session_state["input_features"] = "\n".join(chosen.get("features", []))
+    st.session_state["input_audience"] = chosen.get("target_audience", "")
+    st.session_state["input_tone"] = chosen.get("tone", "professional")
+    st.session_state["input_keywords"] = ", ".join(chosen.get("seo_keywords", []))
+    st.session_state["input_notes"] = chosen.get("additional_notes", "")
+    # Clear stale output on preset change
+    st.session_state.pop("gen_result", None)
+    st.session_state.pop("last_input", None)
+    st.session_state["input_dirty"] = False
+
+
+def clear_product_form() -> None:
+    """Clear all form inputs and reset generation state."""
+    st.session_state["input_product_name"] = ""
+    st.session_state["input_category"] = "electronics"
+    st.session_state["input_features"] = ""
+    st.session_state["input_audience"] = ""
+    st.session_state["input_tone"] = "professional"
+    st.session_state["input_keywords"] = ""
+    st.session_state["input_notes"] = ""
+    st.session_state["input_dirty"] = False
+    st.session_state.pop("gen_result", None)
+    st.session_state.pop("last_input", None)
+
+
+def mark_input_dirty() -> None:
+    """Flag that the input fields have been edited by the user."""
+    st.session_state["input_dirty"] = True
+
+
+# Initialize default widget states if not already present
+if "input_product_name" not in st.session_state:
+    st.session_state["input_product_name"] = ""
+if "input_category" not in st.session_state:
+    st.session_state["input_category"] = "electronics"
+if "input_features" not in st.session_state:
+    st.session_state["input_features"] = ""
+if "input_audience" not in st.session_state:
+    st.session_state["input_audience"] = ""
+if "input_tone" not in st.session_state:
+    st.session_state["input_tone"] = "professional"
+if "input_keywords" not in st.session_state:
+    st.session_state["input_keywords"] = ""
+if "input_notes" not in st.session_state:
+    st.session_state["input_notes"] = ""
+if "input_dirty" not in st.session_state:
+    st.session_state["input_dirty"] = False
 
 
 # Sidebar for sample product loading and configuration inspection
@@ -180,23 +241,28 @@ with st.sidebar:
         sample_options = [
             f"[{s['category'].upper()}] {s['product_name']}" for s in samples
         ]
-        selected_sample_idx = st.selectbox(
+        selected_label = st.selectbox(
             "Select a benchmark product",
-            range(len(sample_options)),
-            format_func=lambda i: sample_options[i],
+            sample_options,
+            key="preset_selection",
             label_visibility="collapsed",
         )
+        selected_sample_idx = sample_options.index(selected_label)
 
-        if st.button("Load preset", use_container_width=True):
-            chosen = samples[selected_sample_idx]
-            st.session_state["p_name"] = chosen["product_name"]
-            st.session_state["p_category"] = chosen["category"]
-            st.session_state["p_features"] = "\n".join(chosen["features"])
-            st.session_state["p_audience"] = chosen.get("target_audience", "")
-            st.session_state["p_tone"] = chosen.get("tone", "professional")
-            st.session_state["p_keywords"] = ", ".join(chosen.get("seo_keywords", []))
-            st.session_state["p_notes"] = chosen.get("additional_notes", "")
-            st.rerun()
+        btn_col1, btn_col2 = st.columns([1.2, 1], gap="small")
+        with btn_col1:
+            st.button(
+                "Load preset",
+                use_container_width=True,
+                on_click=load_preset_into_form,
+                args=(samples, selected_sample_idx),
+            )
+        with btn_col2:
+            st.button(
+                "Clear form",
+                use_container_width=True,
+                on_click=clear_product_form,
+            )
 
     st.markdown("---")
     st.markdown('<div class="section-label">System status</div>', unsafe_allow_html=True)
@@ -215,8 +281,17 @@ with st.sidebar:
     else:
         st.warning("API key not detected in `.env`.")
 
+    with st.expander("⚙️ Advanced Pipeline Settings"):
+        selected_max_retries = st.slider(
+            "Max Repair Retries",
+            min_value=0,
+            max_value=3,
+            value=config.max_retries,
+            help="Number of bounded LLM repair attempts if deterministic validation fails.",
+        )
+
     st.markdown("---")
-    st.caption("AI-Powered eCommerce Product Description Generator v1.0")
+    st.caption("AI Product Description Generator v1.0")
 
 
 # Header
@@ -226,7 +301,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Input & Output Layout: 0.95 to 1.05 with large gap for generous output space
+# Input & Output Layout: 0.95 to 1.05 with large gap for generous reading space
 col_left, col_right = st.columns([0.95, 1.05], gap="large")
 
 with col_left:
@@ -234,84 +309,105 @@ with col_left:
 
     product_name = st.text_input(
         "Product Name *",
-        value=st.session_state.get("p_name", "AuraFlow ANC Wireless Over-Ear Headphones"),
         key="input_product_name",
-        help="Official storefront name or model designation",
+        placeholder="e.g. AuraFlow ANC Wireless Headphones",
+        help="Enter the exact storefront product name.",
+        on_change=mark_input_dirty,
     )
 
     cat_options = ["electronics", "apparel", "home_goods"]
-    current_cat = st.session_state.get("p_category", "electronics")
-    cat_idx = cat_options.index(current_cat) if current_cat in cat_options else 0
     category = st.selectbox(
         "Category *",
         cat_options,
-        index=cat_idx,
         key="input_category",
         help="Specialized category instructions loaded from JSON prompts",
+        on_change=mark_input_dirty,
     )
 
-    default_features = (
-        "Hybrid Active Noise Cancellation with dual feedback microphones\n"
-        "40mm custom bio-cellulose dynamic drivers\n"
-        "Up to 45 hours battery life with ANC off, 35 hours with ANC on\n"
-        "USB-C fast charging: 10 minutes gives 4 hours playback\n"
-        "Bluetooth 5.3 with multipoint pairing for two devices simultaneously\n"
-        "Foldable design with memory foam protein leather earcups"
-    )
     features_raw = st.text_area(
         "Verified Product Features *",
-        value=st.session_state.get("p_features", default_features),
-        height=160,
         key="input_features",
+        height=160,
+        placeholder=(
+            "Enter one verified fact per line:\n\n"
+            "40mm dynamic drivers\n"
+            "Bluetooth 5.3\n"
+            "45-hour battery life"
+        ),
         help="Strict closed-world policy: Only provided facts will be used in copy.",
+        on_change=mark_input_dirty,
     )
 
-    # Feature counter
+    # Feature counter & closed-world notice
     feature_count = len([f for f in features_raw.split("\n") if f.strip()])
-    st.caption(f"{feature_count} verified feature" + ("s" if feature_count != 1 else ""))
+    st.caption(
+        f"{feature_count} verified fact{'s' if feature_count != 1 else ''} — "
+        "Only these facts will be used to generate product claims."
+    )
 
     sub_col1, sub_col2 = st.columns(2)
     with sub_col1:
         tones = ["professional", "casual", "persuasive", "minimal", "luxury", "technical"]
-        current_tone = st.session_state.get("p_tone", "professional")
-        tone_idx = tones.index(current_tone) if current_tone in tones else 0
-        tone = st.selectbox("Tone of Voice", tones, index=tone_idx, key="input_tone")
+        tone = st.selectbox(
+            "Tone of Voice",
+            tones,
+            key="input_tone",
+            on_change=mark_input_dirty,
+        )
 
     with sub_col2:
         target_audience = st.text_input(
             "Target Audience",
-            value=st.session_state.get("p_audience", "Commuters, remote professionals, and audio enthusiasts"),
             key="input_audience",
+            placeholder="e.g. Remote professionals and commuters",
+            on_change=mark_input_dirty,
         )
 
     seo_keywords_raw = st.text_input(
         "SEO Keywords",
-        value=st.session_state.get("p_keywords", "wireless headphones, ANC headphones, bluetooth over-ear, long battery life"),
         key="input_keywords",
+        placeholder="wireless headphones, ANC headphones, bluetooth",
         help="Target keywords to naturally weave into descriptions",
+        on_change=mark_input_dirty,
     )
 
     additional_notes = st.text_input(
         "Additional Instructions",
-        value=st.session_state.get("p_notes", "Emphasize daily commuting comfort and clear microphone clarity."),
         key="input_notes",
+        placeholder="Optional: emphasize comfort, portability, clean design...",
+        on_change=mark_input_dirty,
     )
 
-    generate_btn = st.button("✨ Generate Product Description", type="primary", use_container_width=True)
+    if not config.is_api_configured():
+        st.error("⚠️ Groq API key is not configured. Add `GROQ_API_KEY` to your `.env` file before generating.")
+
+    generate_btn = st.button(
+        "✨ Generate Product Description",
+        type="primary",
+        use_container_width=True,
+        disabled=not config.is_api_configured(),
+    )
 
 # Process Generation
 if generate_btn:
-    features_list = [f.strip() for f in features_raw.split("\n") if f.strip()]
+    # Deduplicate and clean features
+    features_list = list(dict.fromkeys(
+        f.strip() for f in features_raw.splitlines() if f.strip()
+    ))
     keywords_list = [k.strip() for k in seo_keywords_raw.split(",") if k.strip()]
 
     if not product_name.strip():
         st.error("Please enter a valid product name.")
+    elif len(product_name.strip()) > 200:
+        st.error("Product name must be 200 characters or fewer.")
     elif not features_list:
         st.error("Please provide at least one verified product feature.")
+    elif len(features_list) > 30:
+        st.error("Please keep verified features to 30 lines or fewer.")
     else:
         try:
             input_contract = ProductInput(
-                product_name=product_name,
+                product_name=product_name.strip(),
                 category=category,
                 features=features_list,
                 target_audience=target_audience.strip() or None,
@@ -322,10 +418,14 @@ if generate_btn:
 
             generator = ProductGenerator()
             with st.spinner("Generating copy & executing deterministic validation..."):
-                gen_result = generator.generate(input_contract)
+                gen_result = generator.generate(
+                    input_contract,
+                    max_retries=st.session_state.get("selected_max_retries", config.max_retries),
+                )
 
             st.session_state["gen_result"] = gen_result
             st.session_state["last_input"] = input_contract
+            st.session_state["input_dirty"] = False
 
         except Exception as e:
             st.error(f"Execution failed: {e}")
@@ -337,13 +437,17 @@ with col_right:
     result = st.session_state.get("gen_result")
     last_input = st.session_state.get("last_input")
 
+    # Stale input warning
+    if st.session_state.get("input_dirty", False) and result is not None:
+        st.warning("⚠️ Your product details have changed. Click **Generate Product Description** to refresh the output.")
+
     if result is None:
-        st.info("👋 Fill in product details and click **Generate Product Description** to preview structured copy, SEO tags, and validation metrics.")
+        st.info("👋 Choose a preset from the sidebar or enter your own product details, then click **Generate Product Description**.")
     else:
         product = result.product
         val = result.validation
 
-        # Redesigned Balanced 3 Metric Cards
+        # Redesigned Balanced 3 Metric Cards with tooltip
         m_col1, m_col2, m_col3 = st.columns(3, gap="small")
         latency_s = result.latency_ms / 1000
         with m_col1:
@@ -360,7 +464,7 @@ with col_right:
         with m_col2:
             st.markdown(
                 f"""
-                <div class="metric-card">
+                <div class="metric-card" title="Number of additional LLM repair attempts after deterministic validation failure.">
                     <div class="metric-label">Repairs</div>
                     <div class="metric-value">{result.retries}</div>
                 </div>
@@ -390,18 +494,21 @@ with col_right:
 
         with tab_content:
             if product:
+                safe_title = html.escape(product.title)
+                safe_short_desc = html.escape(product.short_description)
+
                 st.markdown('<div class="section-label">Generated description</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="output-title">{product.title}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="copy-box">{product.short_description}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="output-title">{safe_title}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="copy-box">{safe_short_desc}</div>', unsafe_allow_html=True)
 
                 st.markdown('<div class="section-label">Key highlights</div>', unsafe_allow_html=True)
                 for bullet in product.bullet_points:
-                    st.markdown(f"- {bullet}")
+                    st.markdown(f"- {html.escape(bullet)}")
 
                 st.markdown('<div class="section-label" style="margin-top:1.2rem;">Detailed overview</div>', unsafe_allow_html=True)
                 st.markdown(product.long_description)
 
-                # Export text
+                # Quick copy-to-clipboard block & .txt download
                 st.markdown("---")
                 copy_text = (
                     f"{product.title}\n\n"
@@ -411,10 +518,15 @@ with col_right:
                     + "\n\nProduct Overview:\n"
                     + product.long_description
                 )
+
+                st.markdown('<div class="section-label">Copy or Export Text</div>', unsafe_allow_html=True)
+                st.code(copy_text, language="markdown")
+
+                export_slug = re.sub(r'[^a-zA-Z0-9_-]', '_', product.title.strip().lower())
                 st.download_button(
-                    "📥 Download Storefront Copy (.txt)",
+                    "📥 Download .txt Copy",
                     data=copy_text,
-                    file_name=f"{product_name.lower().replace(' ', '_')}_copy.txt",
+                    file_name=f"{export_slug}_copy.txt",
                     mime="text/plain",
                     use_container_width=True,
                 )
@@ -460,10 +572,11 @@ with col_right:
             if product:
                 formatted_json = json.dumps(product.model_dump(), indent=2)
                 st.code(formatted_json, language="json")
+                export_slug = re.sub(r'[^a-zA-Z0-9_-]', '_', product.title.strip().lower())
                 st.download_button(
                     label="📥 Download JSON",
                     data=formatted_json,
-                    file_name=f"{product_name.lower().replace(' ', '_')}_copy.json",
+                    file_name=f"{export_slug}_copy.json",
                     mime="application/json",
                     use_container_width=True,
                 )
@@ -516,12 +629,13 @@ with col_right:
             st.markdown("---")
             st.subheader("📦 Platform Exports")
             exp_col1, exp_col2 = st.columns(2)
+            export_slug = re.sub(r'[^a-zA-Z0-9_-]', '_', product.title.strip().lower())
             with exp_col1:
                 shopify_data = to_shopify_payload(product, last_input)
                 st.download_button(
                     "🛍️ Shopify Payload (JSON)",
                     data=json.dumps(shopify_data, indent=2),
-                    file_name="shopify_product.json",
+                    file_name=f"{export_slug}_shopify.json",
                     mime="application/json",
                     use_container_width=True,
                 )
@@ -530,7 +644,7 @@ with col_right:
                 st.download_button(
                     "🛒 WooCommerce Payload (JSON)",
                     data=json.dumps(woo_data, indent=2),
-                    file_name="woocommerce_product.json",
+                    file_name=f"{export_slug}_woocommerce.json",
                     mime="application/json",
                     use_container_width=True,
                 )

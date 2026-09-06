@@ -234,10 +234,11 @@ class ProductGenerator:
                 temperature=self.config.openai_temperature,
             )
 
-    def generate(self, input_data: ProductInput) -> GenerationResult:
+    def generate(self, input_data: ProductInput, max_retries: Optional[int] = None) -> GenerationResult:
         """Execute the full generation and validation pipeline with bounded repair."""
         start_time = time.perf_counter()
         retries = 0
+        retries_limit = max_retries if max_retries is not None else self.config.max_retries
 
         # Load category config
         try:
@@ -266,7 +267,7 @@ class ProductGenerator:
         current_description: Optional[ProductDescription] = None
         current_validation: Optional[ValidationResult] = None
 
-        while retries <= self.config.max_retries:
+        while retries <= retries_limit:
             try:
                 response = llm.invoke(messages)
                 raw_text = response.content if hasattr(response, "content") else str(response)
@@ -295,28 +296,34 @@ class ProductGenerator:
                         raw_response=last_raw_response,
                     )
 
-                # If invalid and we have retries remaining, prepare repair prompt
-                if retries < self.config.max_retries:
+                # If invalid and we have retries remaining, prepare fresh repair prompt without context bloat
+                if retries < retries_limit:
                     retries += 1
                     repair_text = compose_repair_prompt(
                         input_data=input_data,
                         previous_output=raw_text,
                         validation_errors=current_validation.errors,
                     )
-                    messages.append(HumanMessage(content=repair_text))
+                    messages = [
+                        SystemMessage(content=system_content),
+                        HumanMessage(content=repair_text),
+                    ]
                 else:
                     break
 
             except Exception as e:
                 parse_err = f"Generation/Parsing error: {e}"
-                if retries < self.config.max_retries:
+                if retries < retries_limit:
                     retries += 1
                     repair_text = compose_repair_prompt(
                         input_data=input_data,
                         previous_output=last_raw_response,
                         validation_errors=[parse_err],
                     )
-                    messages.append(HumanMessage(content=repair_text))
+                    messages = [
+                        SystemMessage(content=system_content),
+                        HumanMessage(content=repair_text),
+                    ]
                 else:
                     val_res = current_validation or ValidationResult(
                         valid=False,
