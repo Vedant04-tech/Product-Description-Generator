@@ -1,87 +1,377 @@
 # AI-Powered eCommerce Product Description Generator
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![LangChain](https://img.shields.io/badge/orchestration-LangChain-green.svg)](https://www.langchain.com/)
-[![Pydantic v2](https://img.shields.io/badge/validation-Pydantic%20v2-red.svg)](https://docs.pydantic.dev/)
-[![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B.svg)](https://streamlit.io/)
-[![Tests Passing](https://img.shields.io/badge/tests-22%2F22%20passing-brightgreen.svg)]()
+> Generate grounded, SEO-optimized eCommerce product copy from verified product facts using LLMs, structured outputs, deterministic validation, and bounded repair.
 
-A controlled GenAI application that transforms structured, verified product facts into high-converting, SEO-optimized eCommerce storefront copy. Built with category-aware prompt composition, LangChain orchestration, strict deterministic validation, and a bounded retry/repair loop.
-
----
-
-## 🌟 Key Features
-
-- **Category-Aware Prompting**: Dedicated, externalized JSON prompt definitions for **Electronics**, **Apparel**, and **Home Goods** specifying domain rules, feature-to-benefit logic, and forbidden claims.
-- **6 Tone Modalities**: Professional, Casual, Persuasive, Minimal, Luxury, and Technical copywriting profiles.
-- **Zero Hallucination Guarantee**: Strict closed-world policy that forbids the LLM from inventing ungrounded specifications, warranties, certifications, or compatibility.
-- **Deterministic Validation**: Automated checks enforcing meta title character limits (30–60 chars), meta description limits (120–160 chars), bullet point boundaries (3–6 items), SEO keyword coverage, and forbidden superlative claim detection.
-- **Bounded Retry/Repair Loop**: Automatically detects validation or schema failures and triggers targeted repair prompts preserving the original facts without entering uncontrolled agentic loops.
-- **Streamlit Interactive UI**: Presentation dashboard with real-time character counters, badge indicators, preset sample loader, and formatted preview tabs.
-- **Storefront Platform Adapters**: Zero-dependency export utilities generating ready-to-use payloads for **Shopify** (REST/Admin API with HTML body and tags) and **WooCommerce** (REST API v3 with Yoast SEO metadata).
-- **Empirical Evaluation Suite**: Benchmark evaluating Prompt V1 (Naive) vs. V2 (Constrained) vs. V3 (Category-Aware + Repair), measuring actual observed time reduction without fabricated metrics.
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![LangChain](https://img.shields.io/badge/LangChain-Orchestration-green.svg)](https://www.langchain.com/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-v2-red.svg)](https://docs.pydantic.dev/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B.svg)](https://streamlit.io/)
+[![LLM](https://img.shields.io/badge/LLM-Groq%20%2F%20OpenAI-purple.svg)](https://groq.com/)
 
 ---
 
-## 🏗️ Architecture
+## Overview
+
+The **AI-Powered eCommerce Product Description Generator** is a controlled GenAI application that converts structured product information into production-ready storefront content.
+
+Instead of asking an LLM to freely write marketing copy, the application follows a controlled pipeline:
 
 ```text
-Streamlit Dashboard / CLI (main.py)
-          │
-          ▼
-   ProductInput (Pydantic Contract)
-          │
-          ▼
-   ProductGenerator (app/generator.py)
-    ├── Category JSON Loader (prompts/{category}.json)
-    ├── Modular Prompt Composer (Base + Category + Tone + SEO + Facts)
-    ├── LangChain Chat Model (ChatGroq / ChatOpenAI)
-    └── Structured Output Parser
-          │
-          ▼
-   Deterministic Content Validator (app/validator.py)
-    ├── Length checks (meta_title: 30-60, meta_desc: 120-160)
-    ├── Bullet count (3-6)
-    ├── Keyword coverage calculation
-    └── Closed-world / forbidden claims check
-          │
-     ┌────┴────────────────────────┐
-   Valid                        Invalid (Repairable)
-     │                             │
-     │                    Bounded Repair Loop (max 2 retries)
-     │                    (injects errors + original facts)
-     │                             │
-     ▼                             ▼
-Final Result ───► Streamlit UI / Platform Adapters / Evaluation Benchmark
+Verified Product Facts
+        │
+        ▼
+   Pydantic Input
+    Validation
+        │
+        ▼
+Category-Aware Prompt
+   Composition
+        │
+        ▼
+     LLM Generation
+        │
+        ▼
+Structured JSON Output
+        │
+        ▼
+Deterministic Validation
+        │
+   ┌────┴────┐
+   │         │
+ Valid     Invalid
+   │         │
+   │      Bounded Repair
+   │       Attempts
+   │         │
+   └────┬────┘
+        ▼
+Validated Product Copy
+        │
+   ┌────┼──────────────┐
+   ▼    ▼              ▼
+Streamlit  CLI   Storefront Payloads
+```
+
+The primary design goal is **controlled generation rather than unrestricted text generation**.
+
+---
+
+# ✨ Features
+
+## 1. Category-Aware Generation
+
+The generator supports:
+
+* Electronics
+* Apparel
+* Home Goods
+
+Each category has its own external JSON prompt configuration containing:
+
+* Category-specific writing rules
+* Feature-to-benefit guidance
+* Forbidden claims
+* Domain-specific constraints
+
+This keeps business rules separate from Python code.
+
+---
+
+## 2. Multiple Writing Tones
+
+The application supports six tone profiles:
+
+* Professional
+* Casual
+* Persuasive
+* Minimal
+* Luxury
+* Technical
+
+The same product facts can therefore produce different storefront styles without changing the underlying generation pipeline.
+
+---
+
+## 3. Grounded / Closed-World Generation
+
+The system is designed to keep generated content grounded in the facts supplied by the user.
+
+The model is instructed not to invent:
+
+* Specifications
+* Certifications
+* Warranties
+* Compatibility
+* Performance guarantees
+* Unsupported product claims
+
+For example, a product feature such as:
+
+```text
+Bluetooth 5.3
+```
+
+can be transformed into a reasonable benefit such as:
+
+```text
+Modern wireless connectivity
+```
+
+but should not become an unsupported claim such as:
+
+```text
+The fastest Bluetooth connection available.
 ```
 
 ---
 
-## 📁 Repository Structure
+## 4. Deterministic Validation
+
+LLM output is validated programmatically after generation.
+
+The validation layer checks:
+
+* Meta title length
+* Meta description length
+* Number of bullet points
+* SEO keyword coverage
+* Forbidden claims
+* Output structure
+* Schema validity
+
+Default SEO constraints include:
+
+| Field            |        Requirement |
+| ---------------- | -----------------: |
+| Meta title       |   30–60 characters |
+| Meta description | 120–160 characters |
+| Bullet points    |                3–6 |
+| Keyword coverage |       Configurable |
+
+This prevents the application from relying entirely on prompt instructions for exact constraints.
+
+---
+
+## 5. Bounded Repair Loop
+
+If generated content fails validation, the application can send a targeted repair request to the LLM.
+
+The repair process is intentionally bounded.
 
 ```text
-Prod Disc Gen_v2/
+Generate
+   │
+   ▼
+Validate
+   │
+   ├── PASS ──► Return result
+   │
+   └── FAIL
+          │
+          ▼
+    Repair Prompt
+          │
+          ▼
+       Generate
+          │
+          ▼
+       Validate
+```
+
+The number of repair attempts is controlled by the application configuration.
+
+This avoids uncontrolled agentic loops, excessive API usage, and unpredictable execution time.
+
+---
+
+# 🖥️ Streamlit Dashboard
+
+The project includes an interactive Streamlit dashboard.
+
+![AI Product Description Generator Dashboard - Product Details & Validation](data/screeshots/sc1.png)
+
+![Streamlit Dashboard - Quick Controls, Preset Loading & Detailed Overview](data/screeshots/sc2.png)
+
+The dashboard provides:
+
+* Product input form
+* Category selection
+* Tone selection
+* Verified feature input
+* Target audience
+* SEO keywords
+* Additional instructions
+* Preset product samples
+* Generation status
+* Latency metrics
+* Retry/repair information
+* Generated product copy
+* SEO metadata
+* Structured JSON output
+* Validation results
+* Shopify export
+* WooCommerce export
+
+Run it with:
+
+```bash
+streamlit run dashboard/streamlit_app.py
+```
+
+---
+
+# 🧩 Generated Output
+
+The generator produces structured product information including:
+
+### Storefront Content
+
+* Product title
+* Short description
+* Long description
+* Feature bullets
+
+### SEO
+
+* Meta title
+* Meta description
+* Keywords used
+
+### Validation
+
+* Validation status
+* Errors
+* Warnings
+* Keyword coverage
+* Retry count
+* Generation latency
+
+---
+
+# 🛒 eCommerce Integrations
+
+The project includes payload converters for:
+
+## Shopify
+
+The application can convert generated content into a Shopify-compatible product payload containing:
+
+* Product title
+* HTML product description
+* Product type
+* Tags
+* SEO title
+* SEO description
+* AI generation metadata
+
+The generated Shopify payload is configured as a draft rather than automatically publishing a product.
+
+## WooCommerce
+
+The application can also generate a WooCommerce REST API-compatible payload containing:
+
+* Product name
+* Short description
+* Full description
+* Categories
+* Tags
+* Yoast SEO metadata
+* Generation metadata
+
+These adapters generate payloads only; they do not require live storefront credentials. 
+
+---
+
+# 🏗️ Architecture
+
+```text
+                         ┌──────────────────────┐
+                         │ Streamlit Dashboard  │
+                         └──────────┬───────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │    ProductInput      │
+                         │    Pydantic Model    │
+                         └──────────┬───────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │  ProductGenerator    │
+                         │                      │
+                         │ Prompt Composition   │
+                         │ Category Rules       │
+                         │ Tone Rules           │
+                         │ SEO Instructions     │
+                         │ LLM Invocation       │
+                         └──────────┬───────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │ Structured JSON      │
+                         │ Output Parsing       │
+                         └──────────┬───────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │ Deterministic        │
+                         │ Validator            │
+                         └──────────┬───────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │ Validation Result    │
+                         └──────────┬───────────┘
+                                    │
+                     ┌──────────────┴──────────────┐
+                     │                             │
+                   PASS                          FAIL
+                     │                             │
+                     │                      Bounded Repair
+                     │                             │
+                     └──────────────┬──────────────┘
+                                    │
+                         ┌──────────▼───────────┐
+                         │ Final Product Result │
+                         └───────┬─────┬────────┘
+                                 │     │
+                    ┌────────────┘     └─────────────┐
+                    ▼                                ▼
+              Streamlit UI                    Platform Adapters
+                                              Shopify / WooCommerce
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+Product-Description-Generator/
+│
 ├── app/
 │   ├── __init__.py
-│   ├── config.py           # Centralized settings and validation thresholds
-│   ├── models.py           # Pydantic schemas (ProductInput, ProductDescription, etc.)
-│   ├── generator.py        # LangChain orchestration, prompt assembly, and repair loop
-│   └── validator.py        # Deterministic checks, length bounds, and claim filtering
+│   ├── config.py
+│   ├── models.py
+│   ├── generator.py
+│   └── validator.py
+│
 ├── prompts/
-│   ├── electronics.json    # Category rules, feature mapping, forbidden claims
+│   ├── electronics.json
 │   ├── apparel.json
 │   └── home_goods.json
+│
 ├── data/
-│   └── samples.json        # Curated benchmark dataset across all 3 categories
+│   ├── samples.json
+│   └── screeshots/
+│       ├── sc1.png
+│       └── sc2.png
+│
 ├── dashboard/
 │   ├── __init__.py
-│   └── streamlit_app.py    # Clean Streamlit user interface
+│   └── streamlit_app.py
+│
 ├── tests/
 │   ├── __init__.py
-│   └── test_generator.py   # Comprehensive offline test suite (22 unit tests)
-├── integrations.py         # Shopify and WooCommerce payload converters
-├── evaluation.py           # Empirical benchmarking and V1 vs V2 vs V3 comparison
-├── main.py                 # CLI interface with interactive mode
+│   └── test_generator.py
+│
+├── integrations.py
+├── evaluation.py
+├── main.py
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
@@ -90,74 +380,167 @@ Prod Disc Gen_v2/
 
 ---
 
-## 🚀 Quickstart Guide
+# ⚙️ Technology Stack
 
-### 1. Prerequisites & Virtual Environment
+| Technology               | Purpose                   |
+| ------------------------ | ------------------------- |
+| Python 3.11+             | Application runtime       |
+| Streamlit                | Web interface             |
+| LangChain                | LLM orchestration         |
+| Groq                     | LLM inference             |
+| OpenAI-compatible models | Optional LLM provider     |
+| Pydantic v2              | Input/output contracts    |
+| python-dotenv            | Environment configuration |
+| Pytest                   | Automated testing         |
 
-Clone the repository and set up a Python 3.11+ virtual environment:
+The project dependencies are defined in `requirements.txt`. 
+
+---
+
+# 🚀 Installation
+
+## 1. Clone the Repository
 
 ```bash
-# Create virtual environment
+git clone https://github.com/Vedant04-tech/Product-Description-Generator.git
+cd Product-Description-Generator
+```
+
+---
+
+## 2. Create a Virtual Environment
+
+### Windows PowerShell
+
+```powershell
 python -m venv .venv
-
-# Activate environment (Windows PowerShell)
 .\.venv\Scripts\Activate.ps1
+```
 
-# Install dependencies
+### macOS / Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
+---
 
-Copy `.env.example` to `.env` and configure your API key:
+# 🔐 Environment Configuration
+
+Create a `.env` file from the provided example:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env`:
-```ini
-# Groq API Configuration (Fast, low-latency inference; configurable per environment)
-GROQ_API_KEY=gsk_your_groq_api_key_here
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Configure your Groq credentials:
+
+```env
+GROQ_API_KEY=gsk_your_api_key_here
+
 GROQ_MODEL=qwen/qwen3.8-27b
 GROQ_TEMPERATURE=0.4
 GROQ_MAX_TOKENS=1200
 
-# Pipeline Settings
 MAX_RETRIES=2
 
-# Validation Thresholds
 META_TITLE_MIN_LEN=30
 META_TITLE_MAX_LEN=60
+
 META_DESC_MIN_LEN=120
 META_DESC_MAX_LEN=160
+
 BULLET_MIN_COUNT=3
 BULLET_MAX_COUNT=6
 ```
 
+Do **not** commit `.env` or API keys to GitHub.
+
 ---
 
-## 💻 Usage
+# ▶️ Running the Application
 
-### Run the Streamlit Dashboard
-
-Launch the browser interface:
+## Streamlit Dashboard
 
 ```bash
 streamlit run dashboard/streamlit_app.py
 ```
 
-- Use the sidebar to load preset samples across **Electronics**, **Apparel**, or **Home Goods**.
-- View real-time validation badges, SEO character counts, JSON payloads, and download Shopify/WooCommerce integration files directly.
+The application will open in your browser.
 
-### Command-Line Interface (CLI)
+Typical workflow:
 
-#### Interactive Mode:
+```text
+1. Enter product information
+2. Select category
+3. Enter verified product features
+4. Select tone
+5. Add SEO keywords
+6. Generate description
+7. Review validation
+8. Export storefront payload
+```
+
+---
+
+# 💻 Command-Line Interface
+
+The project also provides a CLI.
+
+## Interactive Mode
+
 ```bash
 python main.py --interactive
 ```
 
-#### Direct Flag Generation:
+The interactive CLI supports:
+
+* Sample product loading
+* Custom product input
+* Category selection
+* Tone selection
+* SEO keywords
+* Additional notes
+
+---
+
+## Direct Generation
+
+Example:
+
+```bash
+python main.py \
+  --name "NovaCharge 65W GaN Dual-Port Wall Charger" \
+  --category electronics \
+  --features \
+    "Gallium Nitride semiconductor" \
+    "Dual ports 65W USB-C and 18W USB-A" \
+    "Foldable wall prongs" \
+  --tone minimal \
+  --keywords \
+    "GaN charger" \
+    "fast wall charger"
+```
+
+The CLI also supports exporting Shopify and WooCommerce payloads.
+
+Example:
+
 ```bash
 python main.py \
   --name "NovaCharge 65W GaN Dual-Port Wall Charger" \
@@ -169,95 +552,500 @@ python main.py \
   --export-woo woo_product.json
 ```
 
-*(Pass `--mock` for instant offline testing without an active API key).*
-
-### Run the Evaluation Benchmark
-
-Run the empirical benchmark across benchmark samples:
-
-```bash
-# Run V1 vs V2 vs V3 Prompt Iteration Benchmark
-python evaluation.py --compare --samples 10
-
-# Run evaluation on live model (or offline with --mock)
-python evaluation.py --samples 15 --output evaluation_report.json
-```
+The CLI implementation supports both interactive and direct argument workflows. 
 
 ---
 
-## 🧪 Testing
+# 🧪 Testing
 
-Run the automated test suite (runs 100% offline using mock LLMs):
+Run the test suite with:
 
 ```bash
 pytest tests/ -v
 ```
 
-### Test Coverage Highlights:
-- **Pydantic Model Validation**: Enforces non-blank names, non-empty features, and valid category enums.
-- **Prompt Architecture**: Verifies JSON prompt loading and prompt composition across all categories and tones.
-- **Deterministic Validation**: Tests meta title bounds, meta description bounds, bullet count restrictions, forbidden claim detection, and keyword coverage.
-- **Bounded Repair Loop**: Simulates first-pass failure followed by targeted repair recovery and max-retry cutoff.
-- **Platform Adapters**: Verifies Shopify HTML and WooCommerce Yoast SEO payload integrity.
+The tests cover areas including:
+
+* Pydantic input validation
+* Product schema validation
+* Category prompt loading
+* Prompt composition
+* SEO validation
+* Bullet count validation
+* Forbidden claims
+* Keyword coverage
+* Retry/repair behavior
+* Integration payload generation
+
+The test suite is designed to run without requiring a live LLM API.
 
 ---
 
-## 📊 Empirical Evaluation & Prompt Iteration
+# 📊 Evaluation & Benchmarking
 
-The evaluation framework measures generation performance across three prompt iterations:
+The repository includes an evaluation framework in:
 
-| Metric | V1: Naive Prompt | V2: Structured Without Repair | V3: Category-Aware + Bounded Repair |
-| :--- | :---: | :---: | :---: |
-| **Output Type** | Plain Text | Structured JSON | Grounded JSON + Platform Ready |
-| **Schema Validity** | 0.0% | 100.0% | **100.0%** |
-| **Validation Pass Rate** | 0.0% | 0.0% (fails strict SEO bounds) | **100.0%** |
-| **SEO Constraint Compliance** | 0.0% | 0.0% | **100.0%** |
-| **Average Keyword Coverage** | 0.0% | 0.0% | **High (Naturally integrated)** |
-| **Avg Latency** | ~1.5s | ~1.8s | **~2.2s (including validation)** |
-| **Human Effort Reduction** | 0.0% (Manual rewrite) | ~50.0% (Requires manual fixes) | **83.3%** |
+```text
+evaluation.py
+```
 
-### Human Effort Measurement Formula
-Unlike marketing claims that invent "70% savings", this system computes time reduction strictly from observed timing:
+It measures:
 
-$$\text{Time Reduction \%} = \frac{\text{Manual Baseline} - (\text{AI Latency} + \text{Human Review})}{\text{Manual Baseline}} \times 100$$
+* Generation success rate
+* Schema validity
+* Validation pass rate
+* SEO compliance
+* Keyword coverage
+* Retry count
+* Average latency
+* Median latency
+* Human-effort reduction
 
-- **Manual Copywriting Baseline**: 15 minutes (900 seconds) per SKU for title, bullets, copy, and SEO tags.
-- **AI-Assisted Workflow**: ~2.5 seconds generation + 2.5 minutes (150 seconds) human review and touch-up = 152.5 seconds total.
-- **Observed Reduction**: **83.1% to 83.3%** human effort savings.
+Run a benchmark:
+
+```bash
+python evaluation.py --samples 10
+```
+
+Run the prompt comparison:
+
+```bash
+python evaluation.py --compare --samples 10
+```
+
+Run an offline benchmark:
+
+```bash
+python evaluation.py --mock --samples 10
+```
+
+Save results:
+
+```bash
+python evaluation.py \
+  --samples 15 \
+  --output evaluation_report.json
+```
+
+The evaluation framework includes mock LLM modes for reproducible offline testing. 
 
 ---
 
-## 🎯 Technical Interview Guide & Design Decisions
+# 🔬 Prompt Evolution
 
-### 1. Why LangChain?
-Used strictly where it adds clear orchestration value:
-- Decoupling chat model abstractions (`ChatGroq`, `ChatOpenAI`) from business logic.
-- Structured message composition (`SystemMessage`, `HumanMessage`).
-- Consistent schema enforcement.
-*We deliberately avoided heavy agent graphs or autonomous loops to keep the execution deterministic, fast, and debuggable.*
+The project evaluates three conceptual prompt versions:
 
-### 2. Why external JSON category prompts?
-Separating prompt domain rules into `prompts/*.json` turns copywriting guidelines into versionable configuration assets. E-commerce category managers can update forbidden claims, feature-to-benefit mappings, or style checklists without touching Python code.
+| Version | Approach                             | Main Limitation                              |
+| ------- | ------------------------------------ | -------------------------------------------- |
+| V1      | Naive prompt                         | Unstructured output                          |
+| V2      | Structured JSON                      | Does not reliably satisfy strict constraints |
+| V3      | Category-aware + validation + repair | Controlled production pipeline               |
 
-### 3. Why deterministic validation in addition to prompting?
-Prompting is probabilistic; LLMs cannot guarantee character counts or absence of forbidden claims 100% of the time. The deterministic validation layer acts as an untrusted output firewall, enforcing exact bounds (e.g., meta description 120–160 chars) before content touches production stores.
+### V1 — Naive
 
-### 4. Why a bounded repair loop instead of an autonomous agent?
-Autonomous agent loops can spin infinitely, run up token bills, and drift from original facts. Our bounded repair loop:
-- Caps retries at `MAX_RETRIES` (default 2).
-- Passes the exact validation failure message back to the LLM.
-- Strictly re-supplies the original product facts to prevent hallucination drift during correction.
+The LLM receives a basic marketing-writing instruction.
 
-### 5. How did we control hallucinations?
-1. **Closed-World Policy**: Prompts strictly instruct the model to only extrapolate from provided bullet points.
-2. **Conservative Benefit Mapping**: Features can be translated to user benefits (e.g. "Bluetooth 5.3" -> "modern wireless connection"), but cannot be turned into ungrounded superlatives ("guaranteed fastest").
-3. **Deterministic Blacklist**: Checks output against category `forbidden_claims` (e.g., "military grade", "hypoallergenic", "unbreakable").
+```text
+Product Facts
+     ↓
+LLM
+     ↓
+Free-form Text
+```
 
-### 6. Why no Database, Vector DB, or RAG in MVP?
-The task is grounded generation where all input facts are provided directly in the request payload. Introducing a vector database would add unnecessary latency, infrastructure cost, and complexity without providing any utility.
+Problem:
 
-### 7. How would you scale this system to production?
-- **Async Processing**: Offload generation tasks to Celery / Redis queue workers for bulk SKU imports (e.g. 5,000 CSV rows).
-- **Semantic Caching**: Cache common feature-to-benefit phrases using Redis to cut LLM token consumption.
-- **Rate Limiting & Cost Routing**: Dynamically route standard SKUs to lightweight models (Llama 3.3 70B, GPT-4o-mini) and high-ticket luxury items to larger reasoning models.
-- **Observability**: Export generation latencies, repair rates, and keyword coverage to OpenTelemetry / Prometheus.
+* No guaranteed schema
+* No deterministic SEO constraints
+* Greater risk of unsupported claims
+
+---
+
+### V2 — Structured
+
+The LLM is instructed to produce JSON.
+
+```text
+Product Facts
+     ↓
+Structured Prompt
+     ↓
+JSON
+     ↓
+Validation
+```
+
+This improves machine-readability but still cannot guarantee exact character limits or other deterministic constraints.
+
+---
+
+### V3 — Controlled Pipeline
+
+The production approach adds:
+
+* Category-specific rules
+* Structured output
+* Deterministic validation
+* Keyword checking
+* Forbidden claim detection
+* Bounded repair
+
+```text
+Facts
+ ↓
+Category Prompt
+ ↓
+LLM
+ ↓
+JSON
+ ↓
+Validator
+ ↓
+Repair if necessary
+ ↓
+Validated Output
+```
+
+---
+
+# 🛡️ Hallucination Control Strategy
+
+The system uses several layers of protection.
+
+### 1. Closed-World Prompting
+
+The LLM is instructed to generate content only from supplied product facts.
+
+### 2. Conservative Feature-to-Benefit Mapping
+
+Features may be translated into reasonable customer benefits, but unsupported specifications and claims are prohibited.
+
+### 3. Deterministic Validation
+
+The validator checks generated content after the LLM responds.
+
+### 4. Forbidden Claims
+
+Category prompt files can define claims that should not appear in generated copy.
+
+### 5. Bounded Repair
+
+Failed outputs are repaired only a limited number of times.
+
+This makes the generation pipeline more predictable than an unconstrained LLM call.
+
+---
+
+# 🧠 Why LangChain?
+
+LangChain is used primarily as an orchestration layer.
+
+The project uses it for:
+
+* Chat model abstraction
+* Structured message composition
+* Provider abstraction
+* Prompt/message management
+
+The application intentionally avoids complex autonomous agents.
+
+The goal is:
+
+```text
+Deterministic pipeline
+        >
+Autonomous agent behavior
+```
+
+for this particular use case.
+
+---
+
+# 🧾 Why Pydantic?
+
+Pydantic provides explicit contracts for the application.
+
+For example:
+
+```text
+ProductInput
+    │
+    ├── product_name
+    ├── category
+    ├── features
+    ├── target_audience
+    ├── tone
+    ├── seo_keywords
+    └── additional_notes
+```
+
+This prevents invalid input from entering the generation pipeline.
+
+The generated product description is also represented through structured models.
+
+---
+
+# 🔍 Why Deterministic Validation?
+
+LLMs are probabilistic.
+
+Even when a prompt says:
+
+```text
+Meta description must contain 120–160 characters.
+```
+
+the model may return:
+
+```text
+118 characters
+```
+
+or:
+
+```text
+171 characters
+```
+
+Therefore, exact constraints are enforced in Python rather than trusting the model alone.
+
+This follows a simple principle:
+
+> **Use the LLM for language generation and Python for deterministic rules.**
+
+---
+
+# 🚫 Why No RAG or Vector Database?
+
+This application does not require RAG for its core workflow.
+
+The product facts are already supplied directly by the user:
+
+```text
+Product
+Features
+Audience
+Tone
+SEO Keywords
+Additional Instructions
+```
+
+There is therefore no need to retrieve external documents to establish product facts.
+
+Adding a vector database would introduce:
+
+* More infrastructure
+* Additional latency
+* More operational complexity
+* Additional failure modes
+
+without providing significant value for the MVP.
+
+---
+
+# 📈 Production Scaling Ideas
+
+Potential future improvements include:
+
+### Bulk SKU Generation
+
+Support CSV or spreadsheet uploads:
+
+```text
+CSV
+ ↓
+Validation
+ ↓
+Parallel Generation
+ ↓
+Validation
+ ↓
+Export
+```
+
+### Async Processing
+
+Use:
+
+* Celery
+* Redis
+* Background workers
+
+for thousands of SKUs.
+
+### Semantic Caching
+
+Cache frequently generated feature-to-benefit transformations to reduce LLM calls.
+
+### Rate Limiting
+
+Control API usage per:
+
+* User
+* Store
+* API key
+* Batch
+
+### Model Routing
+
+Use smaller/cheaper models for simple products and larger models for more complex copywriting tasks.
+
+### Observability
+
+Track:
+
+* Generation latency
+* Validation failure rate
+* Repair rate
+* Token usage
+* Keyword coverage
+* Model errors
+
+Potential tools include:
+
+* OpenTelemetry
+* Prometheus
+* Grafana
+
+---
+
+# 🔒 Security Notes
+
+Never commit credentials to the repository.
+
+Do not place API keys directly in:
+
+```text
+main.py
+generator.py
+dashboard/
+prompts/
+```
+
+Use environment variables instead:
+
+```env
+GROQ_API_KEY=...
+```
+
+The `.env` file should remain local and should be included in `.gitignore`.
+
+---
+
+# ⚠️ Current Limitations
+
+This project is designed as an MVP / portfolio-grade GenAI application.
+
+Current limitations include:
+
+* Generation depends on the configured LLM provider.
+* SEO validation is rule-based rather than search-engine based.
+* Product factual accuracy depends on the quality of supplied source facts.
+* Storefront integrations currently generate API payloads rather than directly publishing products.
+* Large-scale batch processing is not yet implemented.
+* Human review is still recommended before publishing generated copy.
+
+---
+
+# 🎯 Example Use Cases
+
+### eCommerce Product Teams
+
+Generate initial storefront copy for new SKUs.
+
+### Marketplace Sellers
+
+Create structured product descriptions from verified specifications.
+
+### Marketing Teams
+
+Generate different copy styles for the same product.
+
+### SEO Teams
+
+Generate metadata and monitor keyword coverage.
+
+### Product Catalog Operations
+
+Process large numbers of product records using the same validation rules.
+
+---
+
+# 📌 Design Principles
+
+The project follows five major principles:
+
+### 1. Ground the model
+
+Only provide verified facts to the generation layer.
+
+### 2. Structure the output
+
+Use schemas instead of relying on free-form text.
+
+### 3. Validate outside the LLM
+
+Use deterministic Python checks for exact requirements.
+
+### 4. Repair within limits
+
+Never allow uncontrolled generation loops.
+
+### 5. Keep business rules configurable
+
+Store category-specific rules in JSON rather than hard-coding everything into Python.
+
+---
+
+# 👨‍💻 Project Goals
+
+This project demonstrates practical application of:
+
+* Generative AI
+* LLM orchestration
+* Prompt engineering
+* Structured generation
+* Pydantic validation
+* Deterministic output validation
+* Retry/repair strategies
+* Streamlit application development
+* eCommerce integrations
+* Offline testing
+* Prompt evaluation
+* AI reliability engineering
+
+The emphasis is not simply on generating text, but on building a **controlled and testable GenAI pipeline**.
+
+---
+
+# 📜 License
+
+```text
+MIT License
+```
+
+---
+
+# ⭐ Future Roadmap
+
+* [ ] CSV bulk product generation
+* [ ] Batch generation dashboard
+* [ ] Direct Shopify publishing
+* [ ] Direct WooCommerce publishing
+* [ ] OpenAI model configuration UI
+* [ ] Generation history
+* [ ] User authentication
+* [ ] Cost/token tracking
+* [ ] Advanced SEO scoring
+* [ ] A/B copy generation
+* [ ] Human approval workflow
+* [ ] Production observability
+* [ ] Async job processing
+
+---
+
+## Author
+
+**Vedant04-tech**
+
+Built as a practical demonstration of controlled, production-oriented GenAI application design for eCommerce content generation.
